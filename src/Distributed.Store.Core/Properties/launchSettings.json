@@ -1,0 +1,11 @@
+﻿{
+  "profiles": {
+    "Distributed.Store.Core": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
