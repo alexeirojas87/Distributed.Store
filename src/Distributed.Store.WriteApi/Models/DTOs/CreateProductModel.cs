@@ -1,4 +1,4 @@
-﻿namespace Distributed.Store.Api.Models.DTOs
+﻿namespace Distributed.Store.WriteApi.Models.DTOs
 {
     public class CreateProductModel
     {
