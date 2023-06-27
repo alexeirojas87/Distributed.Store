@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Distributed.Store.ReadApi",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Distributed.Store.WriteApi", "src\Distributed.Store.WriteApi\Distributed.Store.WriteApi.csproj", "{808D2A4B-DCCC-42E6-930A-5BC3E3AB60B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Distributed.Store.Shared", "src\Distributed.Store.Shared\Distributed.Store.Shared.csproj", "{0853B6AA-3199-48D3-9FB0-3FB0443985BF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{808D2A4B-DCCC-42E6-930A-5BC3E3AB60B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{808D2A4B-DCCC-42E6-930A-5BC3E3AB60B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{808D2A4B-DCCC-42E6-930A-5BC3E3AB60B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0853B6AA-3199-48D3-9FB0-3FB0443985BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0853B6AA-3199-48D3-9FB0-3FB0443985BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0853B6AA-3199-48D3-9FB0-3FB0443985BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0853B6AA-3199-48D3-9FB0-3FB0443985BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{50C5F0D2-1777-4A7C-B6B8-8EE34DEAB5F5} = {58F22256-9B27-4426-B2BA-F361F5A78283}
 		{6BE827E7-6C25-4CA9-8F25-ACD22DD5F34D} = {0B6128A5-0F58-48BB-A286-4261BDB8099E}
 		{808D2A4B-DCCC-42E6-930A-5BC3E3AB60B7} = {0B6128A5-0F58-48BB-A286-4261BDB8099E}
+		{0853B6AA-3199-48D3-9FB0-3FB0443985BF} = {0B6128A5-0F58-48BB-A286-4261BDB8099E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C4A4CAC3-FF28-4C78-B469-8F393ED6B032}
