@@ -10,6 +10,7 @@ using RabbitMQ.Client.Events;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using ExchangeType = Distributed.Store.Shared.RabbitMQ.Models.ExchangeType;
 
 namespace Distributed.Store.Shared.RabbitMQ
 {
@@ -30,17 +31,23 @@ namespace Distributed.Store.Shared.RabbitMQ
             _logger = logger;
             _connectionFactory = connectionFactory;
         }
-        public Task StartAsync(string queueName, CancellationToken cancelToken = default)
+        public Task StartAsync(string queueName, string routingKey = "", CancellationToken cancelToken = default)
         {
-            return Task.Run(async () => await Consume(queueName, cancelToken), cancelToken);
+            return Task.Run(async () => await Consume(queueName, routingKey, cancelToken), cancelToken);
         }
 
-        private async Task Consume(string queueName, CancellationToken cancellationToken)
+        private async Task Consume(string queueName, string routingKey = "", CancellationToken cancellationToken = default)
         {
-            using IConnection connection = _connectionFactory.CreateConnection();
-            using IModel channel = connection.CreateModel();
-            channel.BasicQos(0, 10, false);
             var cancellationTokenShutdown = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var exchangeType = Enum.GetName(typeof(ExchangeType), _settings.Exchange.Type);
+
+            using var connection = _connectionFactory.CreateConnection();
+            using var channel = connection.CreateModel();
+            channel.BasicQos(0, 10, false);
+            channel.ExchangeDeclare(exchange: _settings.Exchange.Name, type: exchangeType, durable: true, autoDelete: false);
+            channel.QueueDeclare(queue: queueName, exclusive: false, autoDelete: false, durable: true);
+            channel.QueueBind(queue: queueName, exchange: _settings.Exchange.Name, routingKey: routingKey);
+
             var consumer = new EventingBasicConsumer(channel);
 
             consumer.Shutdown += (_, ea) =>

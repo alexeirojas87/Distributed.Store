@@ -31,7 +31,7 @@ namespace Distributed.Store.Shared.RabbitMQ
             StarProducer();
         }
 
-        public Task Produce(TData message, string? routingKey = null, CancellationToken cancellationToken = default)
+        public Task Produce(TData message, string routingKey = "", CancellationToken cancellationToken = default)
         {
             using var channel = _connection.CreateModel();
             PublishSingle(message, channel, routingKey);
@@ -39,7 +39,7 @@ namespace Distributed.Store.Shared.RabbitMQ
             return Task.CompletedTask;
         }
 
-        public Task ProduceMany(IEnumerable<TData> messages, string? routingKey = null, CancellationToken cancellationToken = default)
+        public Task ProduceMany(IEnumerable<TData> messages, string routingKey = "", CancellationToken cancellationToken = default)
         {
             using var channel = _connection.CreateModel();
             foreach (var message in messages)
@@ -50,7 +50,7 @@ namespace Distributed.Store.Shared.RabbitMQ
             return Task.CompletedTask;
         }
 
-        private void PublishSingle(TData message, IModel model, string? routingKey)
+        private void PublishSingle(TData message, IModel model, string routingKey = "")
         {
             var properties = model.CreateBasicProperties();
             properties.Persistent = true;
@@ -63,8 +63,8 @@ namespace Distributed.Store.Shared.RabbitMQ
             {
                 try
                 {
-                    model.BasicPublish(exchange: _config.Exchange,
-                    routingKey: routingKey ?? "",
+                    model.BasicPublish(exchange: _config.Exchange.Name,
+                    routingKey: routingKey,
                     basicProperties: properties,
                     body: message.SerializeToUtf8Bytes());
                     _logger.LogDebug("Published message {message} in exchange {exchange} with routing key {routingKey}", message, _config.Exchange, routingKey);
