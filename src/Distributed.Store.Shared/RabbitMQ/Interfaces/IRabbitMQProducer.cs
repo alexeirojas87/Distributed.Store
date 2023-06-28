@@ -2,7 +2,7 @@
 {
     public interface IRabbitMQProducer<TData>
     {
-        Task Produce(TData message, string? routingKey = null, CancellationToken cancellationToken = default);
-        Task ProduceMany(IEnumerable<TData> messages, string? routingKey = null, CancellationToken cancellationToken = default);
+        Task Produce(TData message, string routingKey = "", CancellationToken cancellationToken = default);
+        Task ProduceMany(IEnumerable<TData> messages, string routingKey = "", CancellationToken cancellationToken = default);
     }
 }

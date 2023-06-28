@@ -4,7 +4,7 @@
     {
         public string Hostname { get; private set; } = null!;
         public RabbitMQCredentials? Credentials { get; private set; }
-        public string? Exchange { get; init; }
+        public required Exchange Exchange { get; init; }
 
         public void SetCredentials(RabbitMQCredentials credentials)
         {
@@ -21,5 +21,18 @@
     {
         public string Username { get; init; } = null!;
         public string Password { get; init; } = null!;
+    }
+    public record Exchange
+    {
+        public string Name { get; init; } = null!;
+        public ExchangeType Type { get; init; } = ExchangeType.fanout!;
+    }
+
+    public enum ExchangeType
+    {
+        direct,
+        topic,
+        header,
+        fanout
     }
 }
