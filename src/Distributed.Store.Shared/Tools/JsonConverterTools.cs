@@ -15,5 +15,11 @@ namespace Distributed.Store.Shared.Tools
 
             return JsonSerializer.Serialize(value, options);
         }
+        public static T Deserialize<T>(this byte[] value, JsonSerializerOptions? options = null)
+        {
+            options ??= DefaultJsonSerializerOptions;
+
+            return JsonSerializer.Deserialize<T>(value, options) ?? throw new ArgumentNullException(nameof(value));
+        }
     }
 }
