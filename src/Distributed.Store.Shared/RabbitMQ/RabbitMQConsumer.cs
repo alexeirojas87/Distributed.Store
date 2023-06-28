@@ -52,49 +52,7 @@ namespace Distributed.Store.Shared.RabbitMQ
                 _logger.LogError("RabbitMQ event shutdown was raised shutdown args {args}", ea.ToString());
                 cancellationTokenShutdown.Cancel();
             };
-            consumer.Received += async (_, ea) =>
-            {
-                var body = ea.Body.ToArray();
-                var deliveryTag = ea.DeliveryTag;
-                TData message;
-                try
-                {
-                    message = body.Deserialize<TData>();
-                }
-                catch (JsonException e)
-                {
-                    _logger.LogError(e, "Failed to deserialize JSON message in rabbitMQ consumer from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message content: {content}"
-                                    , ea.Exchange, ea.RoutingKey, ea.DeliveryTag, Encoding.UTF8.GetString(body));
-                    HandleErrorMessage(channel, ea);
-                    return;
-                }
-
-                _logger.LogDebug("Received: from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message {message}, and traceId {IdTransaction}",
-                                               ea.Exchange, ea.RoutingKey, ea.DeliveryTag, message, Activity.Current?.TraceId);
-
-                if (ea.BasicProperties.Headers.Any())
-                {
-                    var context = Propagators.DefaultTextMapPropagator.Extract(default, ea.BasicProperties.Headers, ExtractRabbitMQHeaders);
-                    if (context.ActivityContext.TraceId != default)
-                        TraceTool.ModifyOTLPActivity(context.ActivityContext.TraceId.ToString());
-                }
-
-                try
-                {
-                    await _handler.HandleMessage(message, cancellationToken);
-                    channel.BasicAck(deliveryTag: deliveryTag, multiple: false);
-                    _logger.LogDebug("ACK to: from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message {message}, and traceId {IdTransaction}",
-                                               ea.Exchange, ea.RoutingKey, ea.DeliveryTag, message, Activity.Current?.TraceId);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Failed to handle message: from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message {message}, and traceId {IdTransaction}",
-                                               ea.Exchange, ea.RoutingKey, ea.DeliveryTag, message, Activity.Current?.TraceId);
-                    HandleErrorMessage(channel, ea);
-                }
-
-
-            };
+            consumer.Received += async (_, ea) => await HandleMessage(channel, ea, cancellationToken);
 
             channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
 
@@ -104,8 +62,6 @@ namespace Distributed.Store.Shared.RabbitMQ
             }
             catch (OperationCanceledException)
             { }
-
-
         }
 
         private static IEnumerable<string> ExtractRabbitMQHeaders(IDictionary<string, object> headers, string key)
@@ -120,6 +76,48 @@ namespace Distributed.Store.Shared.RabbitMQ
                 {
                     yield return strValue;
                 }
+            }
+        }
+
+        private async Task HandleMessage(IModel channel, BasicDeliverEventArgs ea, CancellationToken cancellationToken)
+        {
+            var body = ea.Body.ToArray();
+            var deliveryTag = ea.DeliveryTag;
+            TData message;
+            try
+            {
+                message = body.Deserialize<TData>();
+            }
+            catch (JsonException e)
+            {
+                _logger.LogError(e, "Failed to deserialize JSON message in rabbitMQ consumer from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message content: {content}"
+                                , ea.Exchange, ea.RoutingKey, ea.DeliveryTag, Encoding.UTF8.GetString(body));
+                HandleErrorMessage(channel, ea);
+                return;
+            }
+
+            _logger.LogDebug("Received: from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message {message}, and traceId {IdTransaction}",
+                                           ea.Exchange, ea.RoutingKey, ea.DeliveryTag, message, Activity.Current?.TraceId);
+
+            if (ea.BasicProperties.Headers.Any())
+            {
+                var context = Propagators.DefaultTextMapPropagator.Extract(default, ea.BasicProperties.Headers, ExtractRabbitMQHeaders);
+                if (context.ActivityContext.TraceId != default)
+                    TraceTool.ModifyOTLPActivity(context.ActivityContext.TraceId.ToString());
+            }
+
+            try
+            {
+                await _handler.HandleMessage(message, cancellationToken);
+                channel.BasicAck(deliveryTag: deliveryTag, multiple: false);
+                _logger.LogDebug("ACK to: from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message {message}, and traceId {IdTransaction}",
+                                           ea.Exchange, ea.RoutingKey, ea.DeliveryTag, message, Activity.Current?.TraceId);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to handle message: from exchange {exchange}, routing key {routingKey}, delivery tag {deliveryTag}, message {message}, and traceId {IdTransaction}",
+                                           ea.Exchange, ea.RoutingKey, ea.DeliveryTag, message, Activity.Current?.TraceId);
+                HandleErrorMessage(channel, ea);
             }
         }
 
