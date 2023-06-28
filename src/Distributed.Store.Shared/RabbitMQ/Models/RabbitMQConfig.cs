@@ -3,8 +3,8 @@
     public class RabbitMQConfig
     {
         public string Hostname { get; set; } = null!;
-        public RabbitMQCredentials? Credentials { get; set; }
-        public Exchange? Exchange { get; set; }
+        public required RabbitMQCredentials Credentials { get; set; }
+        public required Exchange Exchange { get; set; }
     }
 
     public record RabbitMQCredentials
