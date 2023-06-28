@@ -16,10 +16,11 @@ namespace Distributed.Store.Shared.RabbitMQ
     public class RabbitMQConsumer<TData> : IRabbitMQConsumer<TData>
     {
         private readonly RabbitMQConfig _settings;
-        private readonly ConnectionFactory _connectionFactory;
+        private readonly IConnectionFactory _connectionFactory;
         private readonly IMessageHandler<TData> _handler;
         private readonly ILogger<RabbitMQConsumer<TData>> _logger;
         public RabbitMQConsumer(
+            IConnectionFactory connectionFactory,
             IOptions<RabbitMQConfig> rabbitMQConfig,
             IMessageHandler<TData> handler,
             ILogger<RabbitMQConsumer<TData>> logger)
@@ -27,12 +28,7 @@ namespace Distributed.Store.Shared.RabbitMQ
             _settings = rabbitMQConfig.Value;
             _handler = handler;
             _logger = logger;
-            _connectionFactory = new ConnectionFactory()
-            {
-                HostName = _settings.Hostname,
-                Password = _settings.Credentials!.Password,
-                UserName = _settings.Credentials.Username
-            };
+            _connectionFactory = connectionFactory;
         }
         public Task StartAsync(string queueName, CancellationToken cancelToken = default)
         {

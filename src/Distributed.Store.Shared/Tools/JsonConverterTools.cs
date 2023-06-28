@@ -21,5 +21,11 @@ namespace Distributed.Store.Shared.Tools
 
             return JsonSerializer.Deserialize<T>(value, options) ?? throw new ArgumentNullException(nameof(value));
         }
+        public static byte[] SerializeToUtf8Bytes<T>(this T value, JsonSerializerOptions? options = null)
+        {
+            options ??= DefaultJsonSerializerOptions;
+
+            return JsonSerializer.SerializeToUtf8Bytes<T>(value, options);
+        }
     }
 }
